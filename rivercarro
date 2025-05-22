@@ -1,0 +1,5 @@
+#!/bin/sh
+
+# River will send the process group of the init executable SIGTERM on exit.
+riverctl default-layout rivercarro
+exec rivercarro -no-smart-gaps &

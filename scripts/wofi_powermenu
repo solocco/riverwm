@@ -1,0 +1,96 @@
+#!/usr/bin/env bash
+
+# Wofi Powermenu for Sway on Void Linux
+
+CONFIG="$HOME/.config/river/wofi/config"
+STYLE="$HOME/.config/river/wofi/style.css"
+
+wofi_command="wofi --show dmenu \
+    --conf ${CONFIG} --style ${STYLE} \
+    --width=300 --height=200 \
+    --cache-file=/dev/null \
+    --hide-scroll --no-actions \
+    --define=matching=fuzzy"
+
+uptime=$(uptime -p | sed -e 's/up //g')
+
+shutdown="⏻ Shutdown"
+reboot=" Restart"
+lock=" Lock"
+suspend=" Suspend"
+logout=" Logout"
+
+# Confirmation dialog fallback
+cdialog() {
+	if command -v yad &>/dev/null; then
+		yad --title='Confirm?' --borders=15 --center --fixed --undecorated \
+			--button=Yes:0 --button=No:1 \
+			--text="Are you sure?" --text-align=center
+	else
+		# Simple terminal prompt fallback
+		read -p "Are you sure? [y/N]: " ans
+		[[ "$ans" =~ ^[Yy]$ ]] && return 0 || return 1
+	fi
+}
+
+# Power commands for non-systemd
+do_shutdown() {
+	exec sudo shutdown -h now
+}
+
+do_reboot() {
+	exec sudo reboot
+}
+
+do_suspend() {
+	if command -v mpc &>/dev/null; then
+		mpc -q pause
+	fi
+	if command -v pulsemixer &>/dev/null; then
+		pulsemixer --mute
+	fi
+	# Use dbus if available
+	if command -v dbus-send &>/dev/null; then
+		dbus-send --system --print-reply \
+			--dest="org.freedesktop.UPower" \
+			/org/freedesktop/UPower \
+			org.freedesktop.UPower.Suspend
+	else
+		echo "Suspend not supported (missing dbus-send)."
+	fi
+}
+
+# Show menu and handle selection
+open_menu () {
+	options="$lock\n$suspend\n$logout\n$reboot\n$shutdown"
+
+	chosen="$(echo -e "$options" | $wofi_command --prompt "UP - $uptime")"
+	case $chosen in
+		$shutdown)
+			cdialog && do_shutdown
+			;;
+		$reboot)
+			cdialog && do_reboot
+			;;
+		$lock)
+			if command -v swaylock &>/dev/null; then
+				swaylock
+			else
+				notify-send "swaylock not installed"
+			fi
+			;;
+		$suspend)
+			cdialog && do_suspend
+			;;
+		$logout)
+			cdialog && swaymsg exit
+			;;
+	esac
+}
+
+# Run menu if Wofi not already open
+if ! pgrep -x wofi >/dev/null; then
+	open_menu
+else
+	pkill wofi
+fi

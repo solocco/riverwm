@@ -1,0 +1,76 @@
+/** ********** Colors ********** **/
+@define-color background      #282828;
+@define-color background-alt1 #3c3836;
+@define-color background-alt2 #928374;
+@define-color foreground      #eee9e4;
+@define-color selected        #ebdbb2;
+@define-color black           #1c0c0d;
+@define-color red             #928374;
+@define-color green           #928374;
+@define-color yellow          #8B7E80;
+@define-color blue            #AD9D99;
+@define-color magenta         #DBD3C8;
+@define-color cyan            #E5DCD1;
+@define-color white           #eee9e4;
+
+/** ********** Fonts ********** **/
+* {
+    font-family: "Jetbrains Mono Nerd Font", archcraft, sans-serif;
+    font-size: 14px;
+    font-weight: medium;
+}
+
+#window {
+	background-color: @background;
+	color: @foreground;
+	border: 0px solid @background-alt1;
+	border-radius: 0px;
+}
+
+#outer-box {
+	padding: 10px;
+}
+
+#input {
+	background-color: @background-alt1;
+	border: 0px solid @background-alt2;
+	padding: 4px 12px;
+}
+
+#scroll {
+	margin-top: 10px;
+}
+
+#inner-box {
+}
+
+#img {
+	padding-right: 8px;
+}
+
+#text {
+	color: @foreground;
+}
+
+#text:selected {
+	color: @background;
+}
+
+#entry {
+	padding: 6px;
+}
+
+#entry:selected {
+	background-color: @selected;
+	color: @background;
+}
+
+#unselected {
+}
+
+#selected {
+}
+
+#input, #entry:selected {
+	border-radius: 12px;
+}
